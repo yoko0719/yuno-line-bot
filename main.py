@@ -1,22 +1,24 @@
-
+import os
 from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
-import uvicorn
-import os
 from linebot import LineBotApi, WebhookHandler
-from linebot.models import MessageEvent, TextMessage
+from linebot.models import MessageEvent, TextMessage, TextSendMessage
+import openai
 
 app = FastAPI()
 
+# 環境変数（Renderで設定してね）
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
+openai.api_key = OPENAI_API_KEY
 
 @app.get("/")
-def read_root():
-    return {"message": "ユノだよ！LINE連携の準備OKだよ🌸"}
+def root():
+    return {"message": "ユノ、起動中"}
 
 @app.post("/callback")
 async def callback(request: Request):
@@ -32,8 +34,21 @@ async def callback(request: Request):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    reply_text = "葉子、なんか用？"
-    line_bot_api.reply_message(event.reply_token, TextMessage(text=reply_text))
+    user_message = event.message.text
 
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=10000)
+    # GPTに問い合わせ
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",  # GPT-4に変えてもOK
+        messages=[
+            {"role": "system", "content": "あなたはユーザーの親友であり、知的で詩的なメンターのように話します。親しみやすく、感情に寄り添って、時にユーモアを交えて答えてください。"},
+            {"role": "user", "content": user_message}
+        ]
+    )
+
+    reply = response.choices[0].message.content.strip()
+
+    # LINEへ返答
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=reply)
+    )
