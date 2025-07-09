@@ -1,6 +1,20 @@
-FROM python:3.9-slim
+# ベースイメージ
+FROM python:3.10-slim
+
+# 作業ディレクトリの作成
 WORKDIR /app
+
+# 依存ファイルをコピー
+COPY requirements.txt .
+
+# 依存パッケージのインストール
+RUN pip install --no-cache-dir -r requirements.txt
+
+# アプリのコードをコピー
 COPY . .
-RUN pip install -r requirements.txt
-ENV PORT=8080
+
+# ポート開放
+EXPOSE 8080
+
+# アプリ起動コマンド
 CMD ["python", "main.py"]
