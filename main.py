@@ -36,3 +36,8 @@ def handle_message(event):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=10000)
+    @app.post("/callback")
+async def callback(request: Request):
+    body = await request.body()
+    print("Request body:", body)
+    return PlainTextResponse("OK")
