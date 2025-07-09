@@ -1,2 +1,4 @@
-flask
+fastapi
+uvicorn
+openai
 line-bot-sdk
