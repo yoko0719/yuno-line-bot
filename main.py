@@ -3,7 +3,7 @@ from fastapi.responses import PlainTextResponse
 import uvicorn
 import os
 from linebot import LineBotApi, WebhookHandler
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import MessageEvent, TextMessage
 
 app = FastAPI()
 
@@ -15,7 +15,7 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 @app.get("/")
 def read_root():
-    return {"message": "ユノだよ！LINE連携の準備OK✨"}
+    return {"message": "ユノだよ！LINE連携の準備OKだよ🌸"}
 
 @app.post("/callback")
 async def callback(request: Request):
@@ -32,12 +32,7 @@ async def callback(request: Request):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     reply_text = "葉子、何か用？"
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_text))
+    line_bot_api.reply_message(event.reply_token, TextMessage(text=reply_text))
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=10000)
-    @app.post("/callback")
-async def callback(request: Request):
-    body = await request.body()
-    print("Request body:", body)
-    return PlainTextResponse("OK")
