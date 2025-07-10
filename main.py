@@ -49,4 +49,14 @@ def handle_message(event):
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=reply)
-    )
+    )@app.post("/callback")
+async def callback(request: Request):
+    body = await request.body()
+    signature = request.headers.get("X-Line-Signature")
+
+    try:
+        handler.handle(body.decode(), signature)
+    except Exception as e:
+        return PlainTextResponse("エラー", status_code=400)
+
+    return PlainTextResponse("OK", status_code=200)
