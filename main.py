@@ -24,15 +24,17 @@ def root():
     return {"message": "ユノ、起動中"}
 
 # LINEからのWebhookを受け取るエンドポイント
+from linebot.exceptions import InvalidSignatureError
+
 @app.post("/callback")
 async def callback(request: Request):
+    signature = request.headers.get("X-Line-Signature", "")
     body = await request.body()
-    signature = request.headers.get("X-Line-Signature")
 
     try:
-        handler.handle(body.decode(), signature)
-    except Exception as e:
-        return PlainTextResponse("エラー", status_code=400)
+        handler.handle(body.decode("utf-8"), signature)
+    except InvalidSignatureError:
+        return PlainTextResponse("Invalid signature", status_code=400)
 
     return PlainTextResponse("OK", status_code=200)
 
